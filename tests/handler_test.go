@@ -16,7 +16,6 @@ func TestHandler(t *testing.T) {
 	resp := httptest.NewRecorder()
 	c := e.NewContext(req, resp)
 	s := &server.Server{}
-	// Assertion
 	if err := s.HealthHandler(c); err != nil {
 		t.Errorf("handler() error = %v", err)
 		return
@@ -25,7 +24,6 @@ func TestHandler(t *testing.T) {
 		t.Errorf("handler() wrong status code = %v", resp.Code)
 		return
 	}
-	// Assertions
 	if assert.NoError(t, s.HealthHandler(c)) {
 		assert.Equal(t, http.StatusOK, resp.Code)
 	}
