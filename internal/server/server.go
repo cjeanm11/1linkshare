@@ -1,7 +1,7 @@
 package server
 
 import (
-	"1linkshare/internal/server/store"
+	"1linkshare/internal/store"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -48,7 +48,7 @@ func NewServer(options ...Option) *Server {
 		store:      store.NewFileStore(),
 		lock:       sync.Mutex{},
 		lockedKeys: map[FixedSizeKey]struct{}{},
-		useTLS:     true,
+		useTLS:     false,
 		useGRPC:    false,
 		
 	}
@@ -184,8 +184,6 @@ func (s *Server) startHTTPServer(wg *sync.WaitGroup) {
 }
 
 func (s *Server) Start() {
-	fmt.Println("start server...")
-
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go s.startHTTPServer(&wg)

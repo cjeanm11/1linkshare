@@ -3,12 +3,13 @@ package server
 import (
 	"1linkshare/internal/utils"
 	"fmt"
+
+	"1linkshare/internal/network"
 	"net/http"
 	"path/filepath"
 	"time"
 
 	"github.com/google/uuid"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -36,7 +37,6 @@ func (s *Server) UploadHandler(c echo.Context) error {
 	for _, file := range files {
 		id = uuid.New().String()
 		filePath := filepath.Join("./uploads", id+"_"+file.Filename)
-		fmt.Println("FILE_ATH " + filePath)
 
 		src, err := file.Open()
 		if err != nil {
@@ -57,14 +57,18 @@ func (s *Server) UploadHandler(c echo.Context) error {
 		s.store.Add(id, filePath)
 	}
 
-	fmt.Printf("test rout : %s", fmt.Sprintf("/share/%s", id))
+	urlCh := make(chan string)
+	go network.RunSSHCommand(urlCh, []string{"-R", "80:localhost:8080", "serveo.net"})
+	forwardedURL := <-urlCh
 
-	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/share/%s", id))
+	fmt.Printf("Tunnel URL: %s/share/%s \n", forwardedURL, id)
+
+	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/share/%s",forwardedURL, id));
 }
+
 
 func (s *Server) ShareHandler(c echo.Context) error {
 	id := c.Param("id")
-	fmt.Println("TEST: id" + id)
 	filePath, ok := s.store.Get(id)
 	if !ok {
 		return echo.NewHTTPError(http.StatusNotFound, "File not found")

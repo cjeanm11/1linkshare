@@ -18,6 +18,8 @@
 go.work
 tmp/
 uploads/
+main
+app.log
 
 # IDE specific files
 .vscode
