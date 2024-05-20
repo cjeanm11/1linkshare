@@ -1,13 +1,27 @@
 package server
 
 import (
+	"io"
+	"net/http"
+	"text/template"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"net/http"
 )
+
+type TemplateRenderer struct {
+	templates *template.Template
+}
+
+func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
 
 func (s *Server) RegisterRoutes() http.Handler {
 	e := echo.New()
+	e.Renderer = &TemplateRenderer{
+		templates: template.Must(template.ParseGlob("templates/*.html")),
+	}
 
 	// Standard middleware
 	e.Use(middleware.Logger())
@@ -34,10 +48,16 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}))
 
 	// Static file serving
-	e.Static("/tmp", "tmp")
+	e.Static("/tmp", "./tmp")
+	e.Static("/uploads", "./uploads")
 
 	// Health check endpoint
 	e.GET("/health", s.HealthHandler)
+
+	e.GET("/", s.HomeHandler)
+	e.GET("/upload", s.UploadHandler)
+	e.POST("/upload", s.UploadHandler)
+	e.GET("/share/:id", s.ShareHandler)
 
 	return e
 }

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"1linkshare/internal/server/store"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -29,13 +30,14 @@ type FixedSizeKey [4]byte
 type Server struct {
 	startTime  time.Time
 	port       int
+	store      *store.FileStore
 	domain     string
 	lock       sync.Mutex
 	lockedKeys map[FixedSizeKey]struct{}
 	httpServer *http.Server
 	grpcServer *grpc.Server
-	useTLS bool
-	useGRPC bool
+	useTLS     bool
+	useGRPC    bool
 }
 
 type Option func(*Server)
@@ -43,22 +45,25 @@ type Option func(*Server)
 func NewServer(options ...Option) *Server {
 	s := &Server{
 		port:       loadPortFromEnv(),
+		store:      store.NewFileStore(),
 		lock:       sync.Mutex{},
 		lockedKeys: map[FixedSizeKey]struct{}{},
-		useTLS:     false,
+		useTLS:     true,
+		useGRPC:    false,
+		
 	}
 	for _, option := range options {
 		option(s)
 	}
 
-	s.InitHTTPServer()
+	s.initHTTPServer()
 	if s.useGRPC {
-		s.initGRPCServer() // Initialize gRPC server
+		s.initGRPCServer() 
 	}
 	return s
 }
 
-func (s *Server) InitHTTPServer() {
+func (s *Server) initHTTPServer() {
 	var cred *tls.Config = nil
 
 	if s.useTLS {
@@ -180,6 +185,7 @@ func (s *Server) startHTTPServer(wg *sync.WaitGroup) {
 
 func (s *Server) Start() {
 	fmt.Println("start server...")
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go s.startHTTPServer(&wg)
@@ -253,7 +259,6 @@ func WithGRPC(useGPRC bool) Option {
 		s.useGRPC = useGPRC
 	}
 }
-
 
 func WithDomain(domain string) Option {
 	return func(s *Server) {

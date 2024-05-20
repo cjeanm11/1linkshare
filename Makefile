@@ -1,6 +1,6 @@
 # Simple Makefile for a Go project
 
-start: watch
+start: clean watch
 
 build:
 	@echo "Building..."

@@ -3,7 +3,7 @@ package tests
 import (
 	"net/http"
 	"net/http/httptest"
-	"server-template/internal/server"
+	"1linkshare/internal/server"
 	"testing"
 
 	"github.com/labstack/echo/v4"
