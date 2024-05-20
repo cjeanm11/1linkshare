@@ -8,30 +8,30 @@ import (
 )
 
 func isValidFilePath(filePath string) bool {
-	if filePath == "" {
-		return false
-	}
-	if _, err := filepath.Abs(filePath); err != nil {
-		return false
-	}
-	return true
+    if filePath == "" {
+        return false
+    }
+    if _, err := filepath.Abs(filePath); err != nil {
+        return false
+    }
+    return true
 }
 
 func CreateFile(filePath string) (*os.File, error) {
-	if !isValidFilePath(filePath) {
-		return nil, errors.New("invalid file path")
-	}
+    if !isValidFilePath(filePath) {
+        return nil, errors.New("invalid file path")
+    }
 
-	dir := filepath.Dir(filePath)
-	if err := os.MkdirAll(dir, 0750); err != nil {
-		return nil, err
-	}
+    dir := filepath.Dir(filePath)
+    if err := os.MkdirAll(dir, 0750); err != nil {
+        return nil, err
+    }
 
-	f, err := os.Create(filePath)
-	if err != nil {
-		return nil, err
-	}
-	return f, nil
+    f, err := os.Create(filePath)
+    if err != nil {
+        return nil, err
+    }
+    return f, nil
 }
 
 func DeleteAllFilesInUploadDir() error {
