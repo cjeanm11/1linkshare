@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	//	"os"
 	srv "server-template/internal/server"
 )
 
@@ -19,6 +20,6 @@ func init() {
 func main() {
 	log.Println("Application started")
 	port := srv.GetPortOrDefault(8080)
-	server := srv.NewServer(srv.WithPort(port), srv.WithTSL(true))
+	server := srv.NewServer(srv.WithPort(port), srv.WithTSL(false))
 	server.Start()
 }

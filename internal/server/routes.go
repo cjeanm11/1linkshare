@@ -9,26 +9,34 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 	e := echo.New()
 
+	// Standard middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+
+	// Security middleware
 	e.Use(SecurityHeadersMiddleware())
 	e.Use(XSSProtectionMiddleware())
 	e.Use(ContentTypeOptionsMiddleware())
 	e.Use(ContentSecurityPolicyMiddleware())
 	e.Use(StrictTransportSecurityMiddleware())
 
+	// CORS configuration
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000"}, 
-		AllowMethods:     []string{"POST", "GET", "OPTIONS"},
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "OPTIONS"},
 		AllowHeaders:     []string{"*"},
 		AllowCredentials: true,
 	}))
+
+	// Secure middleware configuration
 	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
 		ContentTypeNosniff: "nosniff",
 	}))
-	e.Static("/tmp", "./.tmp")
-	e.GET("/", s.HelloWorldHandler)
-	e.POST("/user", s.AddUser)
+
+	// Static file serving
+	e.Static("/tmp", "tmp")
+
+	// Health check endpoint
 	e.GET("/health", s.HealthHandler)
 
 	return e

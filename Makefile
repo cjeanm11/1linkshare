@@ -1,31 +1,15 @@
 # Simple Makefile for a Go project
 
+start: watch
+
 build:
 	@echo "Building..."
-	
 	@go build -o main cmd/api/main.go
 
 # Run the application
 run:
 	@go run cmd/api/main.go
 
-# Create DB container
-docker-run:
-	@if docker compose up 2>/dev/null; then \
-		: ; \
-	else \
-		echo "Falling back to Docker Compose V1"; \
-		docker-compose up; \
-	fi
-
-# Shutdown DB container
-docker-down:
-	@if docker compose down 2>/dev/null; then \
-		: ; \
-	else \
-		echo "Falling back to Docker Compose V1"; \
-		docker-compose down; \
-	fi
 
 # Test the application
 test: clean build
@@ -70,4 +54,4 @@ watch:
 	    fi; \
 	fi
 
-.PHONY: all build run test gen-cert clear-cert clean
+.PHONY: start build run test gen-cert clear-cert clean 

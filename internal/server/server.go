@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"server-template/internal/database"
 	"strconv"
 	"sync"
 	"time"
@@ -28,14 +27,14 @@ const (
 type FixedSizeKey [4]byte
 
 type Server struct {
+	startTime  time.Time
 	port       int
 	domain     string
-	db         database.Service
 	lock       sync.Mutex
 	lockedKeys map[FixedSizeKey]struct{}
 	httpServer *http.Server
 	grpcServer *grpc.Server
-	useTLS     bool
+	useTLS bool
 }
 
 type Option func(*Server)
@@ -51,13 +50,12 @@ func NewServer(options ...Option) *Server {
 		option(s)
 	}
 
-	s.initHTTPServer()
-	s.initGRPCServer() // Initialize gRPC server
-
+	s.InitHTTPServer()
+	// s.initGRPCServer() // Initialize gRPC server
 	return s
 }
 
-func (s *Server) initHTTPServer() {
+func (s *Server) InitHTTPServer() {
 	var cred *tls.Config = nil
 
 	if s.useTLS {
@@ -88,8 +86,8 @@ func loadTLSCertificate(certFile, keyFile string) *tls.Config {
 		panic(err)
 	}
 	if !certPool.AppendCertsFromPEM(certBytes) {
-        panic("failed to append certs from PEM")
-    }
+		panic("failed to append certs from PEM")
+	}
 
 	return &tls.Config{
 		Certificates: []tls.Certificate{cert},
@@ -108,8 +106,8 @@ func GetTLSConfig(domain string) *tls.Config {
 
 	return &tls.Config{
 		PreferServerCipherSuites: true,
-		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP521, tls.CurveP384, tls.CurveP256},
-		MinVersion:            tls.VersionTLS13,
+		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP521, tls.CurveP384, tls.CurveP256},
+		MinVersion:               tls.VersionTLS13,
 		CipherSuites: []uint16{
 			tls.TLS_AES_256_GCM_SHA384,
 			tls.TLS_AES_128_GCM_SHA256,
@@ -119,8 +117,7 @@ func GetTLSConfig(domain string) *tls.Config {
 	}
 }
 
-
-func (s *Server) initGRPCServer() {
+func (s *Server) InitGRPCServer() {
 	var opts []grpc.ServerOption
 
 	if s.useTLS {
@@ -145,10 +142,11 @@ func (s *Server) initGRPCServer() {
 	s.grpcServer = grpc.NewServer(opts...)
 }
 
-func (s *Server) startGRPCServer(wg *sync.WaitGroup) {
+func (s *Server) StartGRPCServer(wg *sync.WaitGroup) {
 	defer wg.Done()
 	grpcAddr := fmt.Sprintf(":%d", s.port+997)
-	grpcListener, err := net.Listen("tcp", grpcAddr)
+	var grpcListener net.Listener; var err error
+	grpcListener, err = net.Listen("tcp", grpcAddr)
 	if err != nil {
 		log.Fatalf("Failed to listen for gRPC: %v", err)
 	}
@@ -160,7 +158,7 @@ func (s *Server) startGRPCServer(wg *sync.WaitGroup) {
 	}
 }
 
-func (s *Server) startHTTPServer(wg *sync.WaitGroup) {
+func (s *Server) StartHTTPServer(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	addr := fmt.Sprintf(":%d", s.port)
@@ -168,7 +166,7 @@ func (s *Server) startHTTPServer(wg *sync.WaitGroup) {
 
 	var err error
 	if s.useTLS {
-		err = s.httpServer.ListenAndServeTLS("", "")
+		err = s.httpServer.ListenAndServeTLS(certFile, keyFile)
 	} else {
 		err = s.httpServer.ListenAndServe()
 	}
@@ -179,13 +177,11 @@ func (s *Server) startHTTPServer(wg *sync.WaitGroup) {
 }
 
 func (s *Server) Start() {
-	fmt.Println("start servers...")
+	fmt.Println("start server...")
 	var wg sync.WaitGroup
-	wg.Add(2)
-	{
-		go s.startHTTPServer(&wg)
-		go s.startGRPCServer(&wg)
-	}
+	wg.Add(1)
+	go s.StartHTTPServer(&wg)
+	//go s.StartGRPCServer(&wg)
 	wg.Wait()
 }
 
@@ -219,7 +215,7 @@ func (a *Server) UnlockKey(key []byte) {
 	delete(a.lockedKeys, keyToCheck)
 }
 
-func (a *Server) UockKey(key []byte) bool {
+func (a *Server) LockKey(key []byte) bool {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 
@@ -246,9 +242,9 @@ func WithTSL(useTSL bool) Option {
 		s.useTLS = useTSL
 	}
 }
+
 func WithDomain(domain string) Option {
 	return func(s *Server) {
 		s.domain = domain
 	}
 }
-
