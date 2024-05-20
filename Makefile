@@ -1,5 +1,4 @@
 # Simple Makefile for a Go project
-
 start: clean watch
 
 build:
