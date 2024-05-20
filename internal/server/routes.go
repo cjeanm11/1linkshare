@@ -54,6 +54,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// Health check endpoint
 	e.GET("/health", s.HealthHandler)
 
+	// Route definitions
 	e.GET("/", s.HomeHandler)
 	e.GET("/upload", s.UploadHandler)
 	e.POST("/upload", s.UploadHandler)

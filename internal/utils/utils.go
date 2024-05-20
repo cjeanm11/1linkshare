@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -13,4 +14,17 @@ func CreateFile(filePath string) (*os.File, error) {
 	}
 
 	return os.Create(filePath)
+}
+
+
+func DeleteAllFilesInUploadDir() error {
+	uploadDir := "./uploads"
+	files, _ := os.ReadDir(uploadDir)
+	for _, file := range files {
+		filePath := filepath.Join(uploadDir, file.Name())
+		if err := os.Remove(filePath); err != nil {
+			log.Println("Error deleting file:", err)
+		}
+	}
+	return nil
 }
