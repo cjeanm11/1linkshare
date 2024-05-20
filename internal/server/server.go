@@ -35,6 +35,7 @@ type Server struct {
 	httpServer *http.Server
 	grpcServer *grpc.Server
 	useTLS bool
+	useGRPC bool
 }
 
 type Option func(*Server)
@@ -51,7 +52,9 @@ func NewServer(options ...Option) *Server {
 	}
 
 	s.InitHTTPServer()
-	// s.initGRPCServer() // Initialize gRPC server
+	if s.useGRPC {
+		s.initGRPCServer() // Initialize gRPC server
+	}
 	return s
 }
 
@@ -117,7 +120,7 @@ func GetTLSConfig(domain string) *tls.Config {
 	}
 }
 
-func (s *Server) InitGRPCServer() {
+func (s *Server) initGRPCServer() {
 	var opts []grpc.ServerOption
 
 	if s.useTLS {
@@ -138,11 +141,10 @@ func (s *Server) InitGRPCServer() {
 	),
 	)
 	opts = append(opts, grpc.MaxConcurrentStreams(5))
-
 	s.grpcServer = grpc.NewServer(opts...)
 }
 
-func (s *Server) StartGRPCServer(wg *sync.WaitGroup) {
+func (s *Server) startGRPCServer(wg *sync.WaitGroup) {
 	defer wg.Done()
 	grpcAddr := fmt.Sprintf(":%d", s.port+997)
 	var grpcListener net.Listener; var err error
@@ -158,7 +160,7 @@ func (s *Server) StartGRPCServer(wg *sync.WaitGroup) {
 	}
 }
 
-func (s *Server) StartHTTPServer(wg *sync.WaitGroup) {
+func (s *Server) startHTTPServer(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	addr := fmt.Sprintf(":%d", s.port)
@@ -180,8 +182,11 @@ func (s *Server) Start() {
 	fmt.Println("start server...")
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go s.StartHTTPServer(&wg)
-	//go s.StartGRPCServer(&wg)
+	go s.startHTTPServer(&wg)
+	if s.useGRPC {
+		wg.Add(1)
+		go s.startGRPCServer(&wg)
+	}
 	wg.Wait()
 }
 
@@ -242,6 +247,13 @@ func WithTSL(useTSL bool) Option {
 		s.useTLS = useTSL
 	}
 }
+
+func WithGRPC(useGPRC bool) Option {
+	return func(s *Server) {
+		s.useGRPC = useGPRC
+	}
+}
+
 
 func WithDomain(domain string) Option {
 	return func(s *Server) {
