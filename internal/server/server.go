@@ -160,7 +160,6 @@ func (s *Server) startGRPCServer(wg *sync.WaitGroup) {
 	}
 	defer grpcListener.Close()
 
-	log.Printf("gRPC server starting on port %d\n", s.port+997)
 	if err := s.grpcServer.Serve(grpcListener); err != nil {
 		log.Fatalf("gRPC server failed to start: %v", err)
 	}
@@ -170,7 +169,6 @@ func (s *Server) startHTTPServer(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	addr := fmt.Sprintf(":%d", s.port)
-	log.Printf("HTTP server starting on port %d\n", s.port)
 
 	var err error
 	if s.useTLS {

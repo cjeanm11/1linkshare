@@ -1,6 +1,6 @@
-# 1LinkSh
+# 1linkssh
 
-1LinkShare is a simple file sharing tool that allows you to quickly and securely share files over the internet. It provides a convenient way to share files with others without needing to rely on third-party file-sharing services.
+1LinkSSH is a simple file sharing tool that allows you to quickly and securely share files over the internet. It provides a convenient way to share files with others without needing to rely on third-party file-sharing services.
 
 ## Installation
 

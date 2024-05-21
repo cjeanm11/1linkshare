@@ -24,7 +24,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}
 
 	// Standard middleware
-	e.Use(middleware.Logger())
+	//e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
 	// Security middleware
@@ -36,7 +36,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// CORS configuration
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"-"},
 		AllowMethods:     []string{"GET", "OPTIONS"},
 		AllowHeaders:     []string{"*"},
 		AllowCredentials: true,

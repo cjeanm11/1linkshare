@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -61,11 +62,16 @@ func (s *Server) UploadHandler(c echo.Context) error {
 	go network.RunSSHCommand(urlCh, []string{"-R", "80:localhost:8080", "serveo.net"})
 	forwardedURL := <-urlCh
 
-	fmt.Printf("Tunnel URL: %s/share/%s \n", forwardedURL, id)
-
-	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/share/%s",forwardedURL, id));
+	body := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#FF8800")).Render
+	fmt.Println()
+	bigSwag := lipgloss.NewStyle().Foreground(lipgloss.Color("#00ff88")).Padding(0, 1).Render
+	urlDisplay := body(fmt.Sprintf("%s/share/%s", forwardedURL, id))
+	tunelURLdisplay := "Tunnel URL:  "
+	fmt.Println(bigSwag(tunelURLdisplay), body(urlDisplay))
+	fmt.Println()
+	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/share/%s", forwardedURL, id))
 }
-
 
 func (s *Server) ShareHandler(c echo.Context) error {
 	id := c.Param("id")
