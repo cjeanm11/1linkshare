@@ -13,7 +13,7 @@ To install and run 1linkssh on your local machine or server, follow these steps:
 
 ## Contributing
 
-Contributions are welcome! If you'd like to contribute to 1LinkShare, please fork the repository, make your changes, and submit a pull request. 
+Contributions are welcome! If you'd like to contribute to 1linkssh, please fork the repository, make your changes, and submit a pull request. 
 
 ## License
 
