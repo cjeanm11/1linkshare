@@ -17,17 +17,18 @@ func isValidFilePath(filePath string) bool {
     return true
 }
 
+
 func CreateFile(filePath string) (*os.File, error) {
-    if !isValidFilePath(filePath) {
+    cleanedPath := filepath.Clean(filePath)
+    if !isValidFilePath(cleanedPath) {
         return nil, errors.New("invalid file path")
     }
+    dir := filepath.Dir(cleanedPath)
 
-    dir := filepath.Dir(filePath)
     if err := os.MkdirAll(dir, 0750); err != nil {
         return nil, err
     }
-
-    f, err := os.Create(filePath)
+    f, err := os.Create(cleanedPath)
     if err != nil {
         return nil, err
     }

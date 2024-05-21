@@ -1,7 +1,6 @@
 package store
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -21,7 +20,6 @@ func (fs *FileStore) Add(id, filePath string) {
 	fs.mutex.Lock()
 	defer fs.mutex.Unlock()
 	fs.store[id] = filePath
-	fmt.Println("{v}", fs.store )
 }
 
 func (fs *FileStore) Get(id string) (string, bool) {
