@@ -8,13 +8,7 @@ To install and run 1LinkShare on your local machine or server, follow these step
 
 1. Clone the repository: `git clone https://github.com/cjeanm11/1linkshare.git`
 2. Navigate to the project directory: `cd 1linkshare`
-3. Install dependencies: `go mod tidy`
-4. Build the project: `go build`
-5. Run the server: `./onelinksh`
-
-## Usage
-
-Once the server is running, you can access the web interface by navigating to `http://localhost:8080` in your web browser. From there, you can upload files and share them with others by copying the generated URL.
+3. Run the cli to upload `test.txt` and generate its URL: `./onelinksh u ./test.txt`
 
 ## Contributing
 
