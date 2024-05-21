@@ -55,7 +55,8 @@ func isValidURL(url string) bool {
 
 
 func UploadFile(url, filePath string) error {
-	file, err := os.Open(filePath)
+    cleanedPath := filepath.Clean(filePath)
+	file, err := os.Open(cleanedPath)
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,7 @@ func UploadFile(url, filePath string) error {
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("uploadFile", filepath.Base(filePath))
+	part, err := writer.CreateFormFile("uploadFile", filepath.Base(cleanedPath))
 	if err != nil {
 		return err
 	}
